@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useRef, useState, use } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
@@ -22,6 +22,7 @@ export default function ProposalDetail({ params }: { params: Promise<{ id: strin
   const [liveDebateMessages, setLiveDebateMessages] = useState<IDebateMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const proposalStatusRef = useRef<string | null>(null);
 
   const fetchData = () => {
     fetch(`/api/proposals/${id}`)
@@ -33,7 +34,18 @@ export default function ProposalDetail({ params }: { params: Promise<{ id: strin
         setReport(data.report);
         if (data.pipelineSteps) setPipelineSteps(data.pipelineSteps);
         if (data.vtnSimTxUrl) setVtnSimTxUrl(data.vtnSimTxUrl);
-        if (data.liveDebateMessages?.length > 0) setLiveDebateMessages(data.liveDebateMessages);
+
+        const newStatus = data.proposal?.status;
+        const wasProcessing = proposalStatusRef.current !== 'complete';
+        proposalStatusRef.current = newStatus;
+
+        if (newStatus === 'complete' && wasProcessing) {
+          // Pipeline just completed — clear streaming preview messages
+          setLiveDebateMessages([]);
+        } else if (data.liveDebateMessages?.length > 0 && newStatus !== 'complete') {
+          setLiveDebateMessages(data.liveDebateMessages);
+        }
+
         setLoading(false);
         setRefreshing(false);
       })
@@ -69,6 +81,7 @@ export default function ProposalDetail({ params }: { params: Promise<{ id: strin
             setVtnSimTxUrl(data.data.url);
           }
           if (data.type === 'debate_message_chunk' && data.data) {
+            if (proposalStatusRef.current === 'complete') return;
             const chunk = data.data as IDebateMessage;
             setLiveDebateMessages(prev => {
               const idx = prev.findIndex(m => m.id === chunk.id);
@@ -81,6 +94,7 @@ export default function ProposalDetail({ params }: { params: Promise<{ id: strin
             });
           }
           if (data.type === 'debate_message' && data.data) {
+            if (proposalStatusRef.current === 'complete') return;
             const msg = data.data as IDebateMessage;
             setLiveDebateMessages(prev => {
               const idx = prev.findIndex(m => m.id === msg.id);

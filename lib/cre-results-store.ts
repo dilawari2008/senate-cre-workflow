@@ -61,6 +61,7 @@ export interface CREEvent {
 type Listener = (proposalId: string, event: CREEvent) => void;
 
 const results = new Map<string, CREResult>();
+const streamingAbortControllers = new Map<string, AbortController>();
 const listeners: Listener[] = [];
 
 export function addListener(fn: Listener) {
@@ -261,6 +262,24 @@ function updateStep(result: CREResult, stepId: string, status: PipelineStepStatu
 async function triggerStreamingDebate(proposalId: string, result: CREResult) {
   console.log(`[StreamDebate] Starting streaming debate for ${proposalId}`);
 
+  const abortController = new AbortController();
+  streamingAbortControllers.set(proposalId, abortController);
+  const { signal } = abortController;
+
+  const emitMessage = (msg: IDebateMessage) => {
+    if (signal.aborted || result.status === 'complete') return;
+
+    const existingIdx = result.messages.findIndex(m => m.id === msg.id);
+    if (existingIdx >= 0) {
+      result.messages[existingIdx] = msg;
+    } else {
+      result.messages.push(msg);
+    }
+
+    const eventType = msg.streaming ? 'debate_message_chunk' : 'debate_message';
+    notify(proposalId, { type: eventType, data: { ...msg }, timestamp: msg.timestamp });
+  };
+
   const proposalText = `${result.title}\n\n(Protocol: ${result.protocol})`;
   const simMetrics: SimMetricsForDebate = result.simMetrics || {
     gasUsed: 150000,
@@ -268,8 +287,9 @@ async function triggerStreamingDebate(proposalId: string, result: CREResult) {
     tvlChangePct: 0,
   };
 
-  // Fetch proposal calldata from MongoDB if available
   let calldataSection = '';
+  let fullProposalText = proposalText;
+
   try {
     const { connectDB } = await import('@/lib/db');
     const ProposalModel = (await import('@/lib/models/Proposal')).default;
@@ -279,51 +299,27 @@ async function triggerStreamingDebate(proposalId: string, result: CREResult) {
       calldataSection = `\n\nEXECUTABLE CALLDATA:\n${(proposal as any).rawCalldata}`;
     }
     if (proposal) {
-      // Use full description from DB
       const desc = (proposal as any).description;
       if (desc && desc.length > 20) {
-        // rebuild with full context
-        await streamAgentDebate(
-          `${result.title}\n\n${desc}${calldataSection}`,
-          simMetrics,
-          (msg) => {
-            // Update or add message in result
-            const existingIdx = result.messages.findIndex(m => m.id === msg.id);
-            if (existingIdx >= 0) {
-              result.messages[existingIdx] = msg;
-            } else {
-              result.messages.push(msg);
-            }
-
-            const eventType = msg.streaming ? 'debate_message_chunk' : 'debate_message';
-            notify(proposalId, { type: eventType, data: { ...msg }, timestamp: msg.timestamp });
-          },
-        );
-        console.log(`[StreamDebate] Streaming debate complete for ${proposalId}`);
-        return;
+        fullProposalText = `${result.title}\n\n${desc}${calldataSection}`;
       }
     }
   } catch (err) {
     console.error(`[StreamDebate] DB fetch error, using basic context:`, err);
   }
 
-  // Fallback: use basic proposal text
-  await streamAgentDebate(
-    `${proposalText}${calldataSection}`,
-    simMetrics,
-    (msg) => {
-      const existingIdx = result.messages.findIndex(m => m.id === msg.id);
-      if (existingIdx >= 0) {
-        result.messages[existingIdx] = msg;
-      } else {
-        result.messages.push(msg);
-      }
-
-      const eventType = msg.streaming ? 'debate_message_chunk' : 'debate_message';
-      notify(proposalId, { type: eventType, data: { ...msg }, timestamp: msg.timestamp });
-    },
-  );
-  console.log(`[StreamDebate] Streaming debate complete for ${proposalId}`);
+  try {
+    await streamAgentDebate(fullProposalText, simMetrics, emitMessage, signal);
+    console.log(`[StreamDebate] Streaming debate complete for ${proposalId}`);
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      console.log(`[StreamDebate] Aborted for ${proposalId} (CRE pipeline completed first)`);
+    } else {
+      console.error(`[StreamDebate] Error for ${proposalId}:`, err);
+    }
+  } finally {
+    streamingAbortControllers.delete(proposalId);
+  }
 }
 
 function voteNumToStr(v: number): VoteOption {
@@ -514,6 +510,16 @@ export function processCREWebhookEvent(type: string, data: Record<string, unknow
       result.txHash = data.txHash as string;
       result.status = 'complete';
       result.completedAt = timestamp;
+
+      // Abort any in-flight streaming debate
+      const controller = streamingAbortControllers.get(proposalId);
+      if (controller) {
+        controller.abort();
+        streamingAbortControllers.delete(proposalId);
+      }
+
+      // Clear streaming preview messages so official CRE messages take their place
+      result.messages = result.messages.filter(m => !m.id.startsWith('stream-'));
 
       if (data.proposalId) result.proposalId = data.proposalId as string;
       if (data.title) result.title = data.title as string;

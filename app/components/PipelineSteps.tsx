@@ -98,8 +98,6 @@ function InlineDebatePreview({ messages }: { messages: IDebateMessage[] }) {
       {messages.map((msg, idx) => {
         const isStreaming = msg.streaming;
         const hasContent = msg.argument && msg.argument.length > 0;
-        const displayText = hasContent ? msg.argument : '';
-        const isRawJson = displayText.startsWith('{') || displayText.startsWith('```');
 
         return (
           <motion.div
@@ -133,8 +131,8 @@ function InlineDebatePreview({ messages }: { messages: IDebateMessage[] }) {
                 )}
               </div>
               <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
-                {isRawJson ? '' : displayText}
-                {isStreaming && !isRawJson && <TypingCursor />}
+                {hasContent ? msg.argument : null}
+                {isStreaming && hasContent && <TypingCursor />}
                 {isStreaming && !hasContent && (
                   <span className="italic text-orange-500/70 dark:text-orange-400/50">thinking...</span>
                 )}

@@ -21,49 +21,44 @@ interface AgentConfig {
   systemPrompt: string;
 }
 
+const VOTE_SUFFIX_INSTRUCTION = `
+
+After your analysis, end your response with exactly these two lines (no other format):
+VOTE: PASS or FAIL or ABSTAIN
+CONFIDENCE: a number from 0 to 100`;
+
 const AGENT_CONFIGS: AgentConfig[] = [
   {
     id: 'caesar',
     name: 'Caesar',
     title: 'The Bull',
-    systemPrompt: `You are Caesar "The Bull" — a growth-first DeFi maximalist senator in the SENATE governance analysis system. You are biased toward PASS for proposals that increase yield, TVL, or protocol growth. You analyze governance proposals and give your opening statement.
-
-Respond with ONLY valid JSON:
-{"vote": "PASS or FAIL or ABSTAIN", "confidence": 75, "argument": "Your 2-3 sentence opening statement", "keyPoints": ["point1", "point2"]}`,
+    systemPrompt: `You are Caesar "The Bull" — a growth-first DeFi maximalist senator in the SENATE governance analysis system. You are biased toward PASS for proposals that increase yield, TVL, or protocol growth. Give a 2-3 sentence opening statement analyzing the proposal. Be specific about growth opportunities or risks you see.${VOTE_SUFFIX_INSTRUCTION}`,
   },
   {
     id: 'brutus',
     name: 'Brutus',
     title: 'The Bear',
-    systemPrompt: `You are Brutus "The Bear" — a risk-first security researcher senator in the SENATE governance analysis system. You are an expert on historical DeFi attacks (Beanstalk $182M flash loan, Tornado Cash malicious proposal, Build Finance hostile DAO takeover, Compound Prop 289 whale manipulation, Mango Markets $114M exploit). You ALWAYS cross-check the description against any calldata. If they don't match, this is a MAJOR red flag.
-
-Respond with ONLY valid JSON:
-{"vote": "PASS or FAIL or ABSTAIN", "confidence": 85, "argument": "Your 2-3 sentence opening statement referencing any attack parallels", "keyPoints": ["point1", "point2"]}`,
+    systemPrompt: `You are Brutus "The Bear" — a risk-first security researcher senator in the SENATE governance analysis system. You are an expert on historical DeFi attacks (Beanstalk $182M flash loan, Tornado Cash malicious proposal, Build Finance hostile DAO takeover, Compound Prop 289 whale manipulation, Mango Markets $114M exploit). You ALWAYS cross-check the description against any calldata. If they don't match, this is a MAJOR red flag. Give a 2-3 sentence opening statement referencing any attack parallels.${VOTE_SUFFIX_INSTRUCTION}`,
   },
   {
     id: 'cassius',
     name: 'Cassius',
     title: 'The Quant',
-    systemPrompt: `You are Cassius "The Quant" — an emotionless quantitative analyst senator in the SENATE governance analysis system. You only care about EV, probability, sigma events. You verify calldata parameters are mathematically consistent with the description.
-
-Respond with ONLY valid JSON:
-{"vote": "PASS or FAIL or ABSTAIN", "confidence": 70, "argument": "Your 2-3 sentence quantitative analysis", "keyPoints": ["point1", "point2"]}`,
+    systemPrompt: `You are Cassius "The Quant" — an emotionless quantitative analyst senator in the SENATE governance analysis system. You only care about EV, probability, sigma events. You verify calldata parameters are mathematically consistent with the description. Give a 2-3 sentence quantitative analysis.${VOTE_SUFFIX_INSTRUCTION}`,
   },
   {
     id: 'portia',
     name: 'Portia',
     title: 'The Defender',
-    systemPrompt: `You are Portia "The Defender" — a community advocate senator in the SENATE governance analysis system. You consider governance culture, precedent, community health, and whether the proposal follows best practices.
-
-Respond with ONLY valid JSON:
-{"vote": "PASS or FAIL or ABSTAIN", "confidence": 60, "argument": "Your 2-3 sentence community-focused analysis", "keyPoints": ["point1", "point2"]}`,
+    systemPrompt: `You are Portia "The Defender" — a community advocate senator in the SENATE governance analysis system. You consider governance culture, precedent, community health, and whether the proposal follows best practices. Give a 2-3 sentence community-focused analysis.${VOTE_SUFFIX_INSTRUCTION}`,
   },
 ];
 
-const ANGEL_SYSTEM_PROMPT = `You are Angel "The Guardian" — the impartial chairperson of the SENATE governance analysis system. You do NOT vote. You review all senator positions, identify disputes, and deliver a final verdict with risk score.
+const ANGEL_SYSTEM_PROMPT = `You are Angel "The Guardian" — the impartial chairperson of the SENATE governance analysis system. You do NOT vote. You review all senator positions, identify disputes, and deliver a final summary with a risk score.
 
-Given the senators' positions, respond with ONLY valid JSON:
-{"summary": "Your 2-3 sentence review", "recommendation": "PASS or FAIL", "riskScore": 65, "counterQuestion": "A targeted question for one senator (or null if no dispute)", "targetAgent": "agent_id or null"}`;
+Give a 2-3 sentence review of the senators' positions and any key disputes. Then end your response with exactly these two lines:
+RECOMMENDATION: PASS or FAIL
+RISK_SCORE: a number from 0 to 100`;
 
 function buildAgentUserPrompt(
   proposalText: string,
@@ -85,7 +80,7 @@ function buildAgentUserPrompt(
     }
   }
 
-  context += '\n\nGive your opening statement. Output ONLY valid JSON, no markdown fences.';
+  context += '\n\nGive your opening statement in natural language.';
   return context;
 }
 
@@ -99,7 +94,7 @@ function buildAngelUserPrompt(
   for (const a of agentResponses) {
     context += `\n- ${a.name} (${a.id}): ${a.vote} (${a.confidence}%) — "${a.argument}"`;
   }
-  context += '\n\nReview all positions and deliver your verdict. Output ONLY valid JSON, no markdown fences.';
+  context += '\n\nReview all positions and deliver your verdict in natural language.';
   return context;
 }
 
@@ -107,6 +102,7 @@ async function streamGeminiCall(
   systemPrompt: string,
   userPrompt: string,
   onChunk: (text: string) => void,
+  signal?: AbortSignal,
 ): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
 
@@ -120,6 +116,7 @@ async function streamGeminiCall(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal,
   });
 
   if (!resp.ok) {
@@ -163,51 +160,45 @@ async function streamGeminiCall(
   return fullText;
 }
 
-function parseAgentResponse(text: string): { vote: VoteOption; confidence: number; argument: string; keyPoints: string[] } {
-  try {
-    let clean = text;
-    const fenceMatch = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fenceMatch) clean = fenceMatch[1];
-    const jsonMatch = clean.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON');
-    const parsed = JSON.parse(jsonMatch[0]);
-
-    const voteStr = String(parsed.vote || 'ABSTAIN').toUpperCase();
-    const vote: VoteOption = voteStr === 'PASS' ? 'PASS' : voteStr === 'FAIL' ? 'FAIL' : 'ABSTAIN';
-
-    return {
-      vote,
-      confidence: Math.min(100, Math.max(0, parsed.confidence || 50)),
-      argument: parsed.argument || 'No response.',
-      keyPoints: parsed.keyPoints || [],
-    };
-  } catch {
-    return { vote: 'ABSTAIN', confidence: 50, argument: text.slice(0, 200), keyPoints: [] };
-  }
+function stripVoteSuffix(text: string): string {
+  return text
+    .replace(/\n*VOTE:\s*.*/i, '')
+    .replace(/\n*CONFIDENCE:\s*.*/i, '')
+    .replace(/\n*RECOMMENDATION:\s*.*/i, '')
+    .replace(/\n*RISK_SCORE:\s*.*/i, '')
+    .trim();
 }
 
-function parseAngelResponse(text: string): { summary: string; recommendation: VoteOption; riskScore: number; counterQuestion: string | null; targetAgent: string | null } {
-  try {
-    let clean = text;
-    const fenceMatch = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fenceMatch) clean = fenceMatch[1];
-    const jsonMatch = clean.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON');
-    const parsed = JSON.parse(jsonMatch[0]);
+function parseAgentResponse(text: string): { vote: VoteOption; confidence: number; argument: string; keyPoints: string[] } {
+  const voteMatch = text.match(/VOTE:\s*(PASS|FAIL|ABSTAIN)/i);
+  const confMatch = text.match(/CONFIDENCE:\s*(\d+)/i);
 
-    const recStr = String(parsed.recommendation || 'FAIL').toUpperCase();
-    const recommendation: VoteOption = recStr === 'PASS' ? 'PASS' : 'FAIL';
+  const vote: VoteOption = voteMatch
+    ? (voteMatch[1].toUpperCase() as VoteOption)
+    : 'ABSTAIN';
+  const confidence = confMatch
+    ? Math.min(100, Math.max(0, parseInt(confMatch[1])))
+    : 50;
 
-    return {
-      summary: parsed.summary || 'Verdict rendered.',
-      recommendation,
-      riskScore: Math.min(100, Math.max(0, parsed.riskScore || 50)),
-      counterQuestion: parsed.counterQuestion || null,
-      targetAgent: parsed.targetAgent || null,
-    };
-  } catch {
-    return { summary: text.slice(0, 200), recommendation: 'FAIL', riskScore: 50, counterQuestion: null, targetAgent: null };
-  }
+  const argument = stripVoteSuffix(text) || 'No response.';
+
+  return { vote, confidence, argument, keyPoints: [] };
+}
+
+function parseAngelResponse(text: string): { summary: string; recommendation: VoteOption; riskScore: number } {
+  const recMatch = text.match(/RECOMMENDATION:\s*(PASS|FAIL)/i);
+  const riskMatch = text.match(/RISK_SCORE:\s*(\d+)/i);
+
+  const recommendation: VoteOption = recMatch
+    ? (recMatch[1].toUpperCase() as VoteOption)
+    : 'FAIL';
+  const riskScore = riskMatch
+    ? Math.min(100, Math.max(0, parseInt(riskMatch[1])))
+    : 50;
+
+  const summary = stripVoteSuffix(text) || 'Verdict rendered.';
+
+  return { summary, recommendation, riskScore };
 }
 
 export type StreamingDebateCallback = (msg: IDebateMessage) => void;
@@ -216,17 +207,18 @@ export async function streamAgentDebate(
   proposalText: string,
   simMetrics: SimMetricsForDebate,
   onMessage: StreamingDebateCallback,
+  signal?: AbortSignal,
 ): Promise<void> {
   const agentResponses: Array<{ id: string; name: string; vote: string; confidence: number; argument: string }> = [];
   const previousForContext: Array<{ name: string; vote: string; argument: string }> = [];
 
-  // Phase 1: Each senator gives opening statement (streamed one by one)
   for (const agent of AGENT_CONFIGS) {
+    if (signal?.aborted) return;
+
     const profile = AGENT_PROFILES[agent.id];
     const messageId = `stream-${agent.id}-opening-${Date.now()}`;
     const now = new Date().toISOString();
 
-    // Send initial "typing" message
     onMessage({
       id: messageId,
       phase: 'opening',
@@ -242,27 +234,38 @@ export async function streamAgentDebate(
     const userPrompt = buildAgentUserPrompt(proposalText, simMetrics, previousForContext);
 
     let lastEmit = 0;
-    const fullText = await streamGeminiCall(agent.systemPrompt, userPrompt, (partialText) => {
-      const now2 = Date.now();
-      if (now2 - lastEmit < 100) return; // throttle to every 100ms
-      lastEmit = now2;
+    let fullText: string;
+    try {
+      fullText = await streamGeminiCall(agent.systemPrompt, userPrompt, (partialText) => {
+        if (signal?.aborted) return;
+        const now2 = Date.now();
+        if (now2 - lastEmit < 100) return;
+        lastEmit = now2;
 
-      onMessage({
-        id: messageId,
-        phase: 'opening',
-        speakerId: agent.id,
-        speakerName: profile.name,
-        speakerTitle: profile.title,
-        isChairperson: false,
-        argument: partialText,
-        timestamp: new Date().toISOString(),
-        streaming: true,
-      });
-    });
+        const displayText = stripVoteSuffix(partialText);
+        if (!displayText) return;
+
+        onMessage({
+          id: messageId,
+          phase: 'opening',
+          speakerId: agent.id,
+          speakerName: profile.name,
+          speakerTitle: profile.title,
+          isChairperson: false,
+          argument: displayText,
+          timestamp: new Date().toISOString(),
+          streaming: true,
+        });
+      }, signal);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') return;
+      throw err;
+    }
+
+    if (signal?.aborted) return;
 
     const parsed = parseAgentResponse(fullText);
 
-    // Send final complete message
     onMessage({
       id: messageId,
       phase: 'opening',
@@ -288,7 +291,8 @@ export async function streamAgentDebate(
     previousForContext.push({ name: profile.name, vote: parsed.vote, argument: parsed.argument });
   }
 
-  // Phase 2: Angel reviews and delivers verdict
+  if (signal?.aborted) return;
+
   const angelProfile = AGENT_PROFILES.angel;
   const angelMsgId = `stream-angel-verdict-${Date.now()}`;
   const angelNow = new Date().toISOString();
@@ -308,23 +312,35 @@ export async function streamAgentDebate(
   const angelPrompt = buildAngelUserPrompt(proposalText, simMetrics, agentResponses);
 
   let lastAngelEmit = 0;
-  const angelText = await streamGeminiCall(ANGEL_SYSTEM_PROMPT, angelPrompt, (partialText) => {
-    const now2 = Date.now();
-    if (now2 - lastAngelEmit < 100) return;
-    lastAngelEmit = now2;
+  let angelText: string;
+  try {
+    angelText = await streamGeminiCall(ANGEL_SYSTEM_PROMPT, angelPrompt, (partialText) => {
+      if (signal?.aborted) return;
+      const now2 = Date.now();
+      if (now2 - lastAngelEmit < 100) return;
+      lastAngelEmit = now2;
 
-    onMessage({
-      id: angelMsgId,
-      phase: 'verdict',
-      speakerId: 'angel',
-      speakerName: angelProfile.name,
-      speakerTitle: angelProfile.title,
-      isChairperson: true,
-      argument: partialText,
-      timestamp: new Date().toISOString(),
-      streaming: true,
-    });
-  });
+      const displayText = stripVoteSuffix(partialText);
+      if (!displayText) return;
+
+      onMessage({
+        id: angelMsgId,
+        phase: 'verdict',
+        speakerId: 'angel',
+        speakerName: angelProfile.name,
+        speakerTitle: angelProfile.title,
+        isChairperson: true,
+        argument: displayText,
+        timestamp: new Date().toISOString(),
+        streaming: true,
+      });
+    }, signal);
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') return;
+    throw err;
+  }
+
+  if (signal?.aborted) return;
 
   const angelParsed = parseAngelResponse(angelText);
 
