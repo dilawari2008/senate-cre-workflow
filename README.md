@@ -174,7 +174,7 @@ SENATE's pipeline must:
 - **Execute off-chain AI** in a decentralized, verifiable manner
 - **Write results on-chain** with DON attestation
 
-Chainlink CRE provides log triggers, HTTP client with DON consensus, EVM write, and `runtime.report()` — all in a single workflow.
+Chainlink CRE provides log triggers, HTTP client with DON consensus, EVM write, and `runtime.report()` — all in a single workflow. CRE handles complex workflows efficiently and has an edge over a centralized server, which may fabricate results.
 
 ---
 
