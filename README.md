@@ -6,6 +6,10 @@
 
 ## Submissions
 
+### Tenderly Explorer Links
+
+- [Tenderly Virtual TestNet Explorer](https://dashboard.tenderly.co/explorer/vnet/e9d3fd02-270b-4e10-847f-db1f59922429)
+
 ### Chainlink Files
 
 - [`main.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/main.ts) — Workflow entry point. Uses `cre.capabilities.HTTPCapability` (HTTP Trigger), `evmClient.logTrigger` (EVM Log Trigger), `cre.capabilities.CronCapability` (Cron Trigger), `Runner.newRunner`, `getNetwork`
@@ -38,10 +42,6 @@
 | SenateGovernor (Compound) | [0x746AD939133F3895B4990cE01CC442D0FC2b80c8](https://sepolia.etherscan.io/address/0x746AD939133F3895B4990cE01CC442D0FC2b80c8#code) |
 | SenateGovernor (Uniswap) | [0xC966383b6cf98f6995285Df798a451a8dC66AF81](https://sepolia.etherscan.io/address/0xC966383b6cf98f6995285Df798a451a8dC66AF81#code) |
 | SenateRiskOracle | [0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D](https://sepolia.etherscan.io/address/0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D#code) |
-
-### Tenderly Explorer Links
-
-- [Tenderly Virtual TestNet Explorer](https://dashboard.tenderly.co/explorer/vnet/e9d3fd02-270b-4e10-847f-db1f59922429)
 
 -----------
 -----------
