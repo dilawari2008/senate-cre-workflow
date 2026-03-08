@@ -1,4 +1,5 @@
 import { IDebateMessage, IVerdict, IAttackMatch, SpeakerId, VoteOption, AGENT_PROFILES, IAgentFinalPosition } from '@/types';
+import { streamAgentDebate, SimMetricsForDebate } from '@/lib/gemini-streaming';
 
 export type PipelineStepStatus = 'pending' | 'running' | 'complete' | 'failed';
 
@@ -38,6 +39,8 @@ export interface CREResult {
   receivedAt: string;
   completedAt?: string;
   pipelineSteps: PipelineStep[];
+  simMetrics?: SimMetricsForDebate;
+  streamingDebateActive?: boolean;
   timing?: {
     simulation?: number;
     attackScan?: number;
@@ -209,9 +212,30 @@ export function processStepLog(proposalId: string, logLine: string) {
   const durationMatch = detail.match(/\((\d+)ms\)/);
   const durationMs = durationMatch ? parseInt(durationMatch[1]) : undefined;
 
+  // Parse sim metrics from step 1 completion: "Simulation complete: gas 150000, risk 25 (1997ms)"
+  if (stepNum === '1' && isEnd) {
+    const gasMatch = detail.match(/gas\s+(\d+)/);
+    const riskMatch = detail.match(/risk\s+(\d+)/);
+    if (gasMatch || riskMatch) {
+      result.simMetrics = {
+        gasUsed: gasMatch ? parseInt(gasMatch[1]) : 150000,
+        liquidationRisk: riskMatch ? parseInt(riskMatch[1]) : 25,
+        tvlChangePct: 0,
+      };
+    }
+  }
+
   if (isStart && !isEnd) {
     updateStep(result, mapping.stepId, 'running', undefined, detail);
     notify(proposalId, { type: 'step_progress', data: { stepId: mapping.stepId, status: 'running', detail }, timestamp: now });
+
+    // When ai_debate step starts, trigger streaming debate from Next.js server
+    if (mapping.stepId === 'ai_debate' && !result.streamingDebateActive) {
+      result.streamingDebateActive = true;
+      triggerStreamingDebate(proposalId, result).catch((err) => {
+        console.error(`[StreamDebate] Error for ${proposalId}:`, err);
+      });
+    }
   } else if (isEnd || durationMs) {
     updateStep(result, mapping.stepId, 'complete', durationMs, detail);
     notify(proposalId, { type: 'step_progress', data: { stepId: mapping.stepId, status: 'complete', durationMs, detail }, timestamp: now });
@@ -232,6 +256,74 @@ function updateStep(result: CREResult, stepId: string, status: PipelineStepStatu
     if (durationMs) step.durationMs = durationMs;
   }
   if (detail) step.detail = detail;
+}
+
+async function triggerStreamingDebate(proposalId: string, result: CREResult) {
+  console.log(`[StreamDebate] Starting streaming debate for ${proposalId}`);
+
+  const proposalText = `${result.title}\n\n(Protocol: ${result.protocol})`;
+  const simMetrics: SimMetricsForDebate = result.simMetrics || {
+    gasUsed: 150000,
+    liquidationRisk: 25,
+    tvlChangePct: 0,
+  };
+
+  // Fetch proposal calldata from MongoDB if available
+  let calldataSection = '';
+  try {
+    const { connectDB } = await import('@/lib/db');
+    const ProposalModel = (await import('@/lib/models/Proposal')).default;
+    await connectDB();
+    const proposal = await ProposalModel.findOne({ proposalId }).lean();
+    if (proposal && (proposal as any).rawCalldata) {
+      calldataSection = `\n\nEXECUTABLE CALLDATA:\n${(proposal as any).rawCalldata}`;
+    }
+    if (proposal) {
+      // Use full description from DB
+      const desc = (proposal as any).description;
+      if (desc && desc.length > 20) {
+        // rebuild with full context
+        await streamAgentDebate(
+          `${result.title}\n\n${desc}${calldataSection}`,
+          simMetrics,
+          (msg) => {
+            // Update or add message in result
+            const existingIdx = result.messages.findIndex(m => m.id === msg.id);
+            if (existingIdx >= 0) {
+              result.messages[existingIdx] = msg;
+            } else {
+              result.messages.push(msg);
+            }
+
+            const eventType = msg.streaming ? 'debate_message_chunk' : 'debate_message';
+            notify(proposalId, { type: eventType, data: { ...msg }, timestamp: msg.timestamp });
+          },
+        );
+        console.log(`[StreamDebate] Streaming debate complete for ${proposalId}`);
+        return;
+      }
+    }
+  } catch (err) {
+    console.error(`[StreamDebate] DB fetch error, using basic context:`, err);
+  }
+
+  // Fallback: use basic proposal text
+  await streamAgentDebate(
+    `${proposalText}${calldataSection}`,
+    simMetrics,
+    (msg) => {
+      const existingIdx = result.messages.findIndex(m => m.id === msg.id);
+      if (existingIdx >= 0) {
+        result.messages[existingIdx] = msg;
+      } else {
+        result.messages.push(msg);
+      }
+
+      const eventType = msg.streaming ? 'debate_message_chunk' : 'debate_message';
+      notify(proposalId, { type: eventType, data: { ...msg }, timestamp: msg.timestamp });
+    },
+  );
+  console.log(`[StreamDebate] Streaming debate complete for ${proposalId}`);
 }
 
 function voteNumToStr(v: number): VoteOption {

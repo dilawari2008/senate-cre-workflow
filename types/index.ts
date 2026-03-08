@@ -66,6 +66,7 @@ export interface IDebateMessage {
   voteAfter?: VoteOption;
   counterQuestionTo?: SpeakerId[];
   timestamp: string;
+  streaming?: boolean;
 }
 
 export interface IAttackMatch {

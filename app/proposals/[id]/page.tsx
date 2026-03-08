@@ -68,8 +68,29 @@ export default function ProposalDetail({ params }: { params: Promise<{ id: strin
           if (data.type === 'vtn_tx_url' && data.data?.url) {
             setVtnSimTxUrl(data.data.url);
           }
+          if (data.type === 'debate_message_chunk' && data.data) {
+            const chunk = data.data as IDebateMessage;
+            setLiveDebateMessages(prev => {
+              const idx = prev.findIndex(m => m.id === chunk.id);
+              if (idx >= 0) {
+                const updated = [...prev];
+                updated[idx] = chunk;
+                return updated;
+              }
+              return [...prev, chunk];
+            });
+          }
           if (data.type === 'debate_message' && data.data) {
-            setLiveDebateMessages(prev => [...prev, data.data as IDebateMessage]);
+            const msg = data.data as IDebateMessage;
+            setLiveDebateMessages(prev => {
+              const idx = prev.findIndex(m => m.id === msg.id);
+              if (idx >= 0) {
+                const updated = [...prev];
+                updated[idx] = { ...msg, streaming: false };
+                return updated;
+              }
+              return [...prev, { ...msg, streaming: false }];
+            });
           }
           fetchData();
         }

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IDebateMessage } from '@/types';
 import AgentAvatar from './AgentAvatar';
 import { SpeakerId } from '@/types';
@@ -78,33 +78,71 @@ const STEP_ICONS: Record<string, string> = {
   complete: '✅',
 };
 
-function InlineDebatePreview({ messages }: { messages: IDebateMessage[] }) {
+function TypingCursor() {
   return (
-    <div className="mt-2 space-y-1.5 max-h-60 overflow-y-auto pr-1">
-      {messages.map((msg, idx) => (
-        <motion.div
-          key={idx}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: idx * 0.05 }}
-          className="flex items-start gap-2 rounded-lg bg-white/60 dark:bg-dark-surface/60 p-2 border border-gray-100 dark:border-dark-border"
-        >
-          <AgentAvatar agentId={msg.speakerId as SpeakerId} size="xs" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{msg.speakerName}</span>
-              {msg.vote && (
-                <span className={`text-[9px] font-bold px-1 rounded ${
-                  msg.vote === 'PASS' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' :
-                  msg.vote === 'FAIL' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' :
-                  'bg-gray-100 text-gray-600'
-                }`}>{msg.vote}</span>
-              )}
+    <span className="inline-block w-1.5 h-3 bg-orange-500 dark:bg-orange-400 animate-pulse rounded-sm ml-0.5 align-middle" />
+  );
+}
+
+function InlineDebatePreview({ messages }: { messages: IDebateMessage[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  return (
+    <div ref={scrollRef} className="mt-2 space-y-1.5 max-h-72 overflow-y-auto pr-1 scroll-smooth">
+      {messages.map((msg, idx) => {
+        const isStreaming = msg.streaming;
+        const hasContent = msg.argument && msg.argument.length > 0;
+        const displayText = hasContent ? msg.argument : '';
+        const isRawJson = displayText.startsWith('{') || displayText.startsWith('```');
+
+        return (
+          <motion.div
+            key={msg.id || idx}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+            className={`flex items-start gap-2 rounded-lg p-2 border transition-colors ${
+              isStreaming
+                ? 'bg-orange-50/80 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800'
+                : 'bg-white/60 dark:bg-dark-surface/60 border-gray-100 dark:border-dark-border'
+            }`}
+          >
+            <AgentAvatar agentId={msg.speakerId as SpeakerId} size="xs" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{msg.speakerName}</span>
+                {isStreaming && (
+                  <span className="flex items-center gap-0.5">
+                    <span className="h-1 w-1 rounded-full bg-orange-500 animate-pulse" />
+                    <span className="h-1 w-1 rounded-full bg-orange-500 animate-pulse [animation-delay:150ms]" />
+                    <span className="h-1 w-1 rounded-full bg-orange-500 animate-pulse [animation-delay:300ms]" />
+                  </span>
+                )}
+                {!isStreaming && msg.vote && (
+                  <span className={`text-[9px] font-bold px-1 rounded ${
+                    msg.vote === 'PASS' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' :
+                    msg.vote === 'FAIL' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' :
+                    'bg-gray-100 text-gray-600'
+                  }`}>{msg.vote}</span>
+                )}
+              </div>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
+                {isRawJson ? '' : displayText}
+                {isStreaming && !isRawJson && <TypingCursor />}
+                {isStreaming && !hasContent && (
+                  <span className="italic text-orange-500/70 dark:text-orange-400/50">thinking...</span>
+                )}
+              </p>
             </div>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">{msg.argument}</p>
-          </div>
-        </motion.div>
-      ))}
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
