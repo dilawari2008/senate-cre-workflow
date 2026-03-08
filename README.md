@@ -1,5 +1,37 @@
 # SENATE AI — Simulated ENvironment for Autonomous Token Evaluation
 
+-----------
+-----------
+-----------
+
+## Submissions
+
+### Chainlink Files
+
+
+
+### Tenderly Files
+
+
+
+### Contract Links (Sepolia)
+
+| Contract | Address |
+|----------|---------|
+| SenateReport | [0x04aD50e73Cdb46fDD0916c73F512E6e60A8f9a21](https://sepolia.etherscan.io/address/0x04aD50e73Cdb46fDD0916c73F512E6e60A8f9a21#code) |
+| SenateGovernor (Aave) | [0xC6833DE453D12Ae096aF77188970aE682D6a620e](https://sepolia.etherscan.io/address/0xC6833DE453D12Ae096aF77188970aE682D6a620e#code) |
+| SenateGovernor (Compound) | [0x746AD939133F3895B4990cE01CC442D0FC2b80c8](https://sepolia.etherscan.io/address/0x746AD939133F3895B4990cE01CC442D0FC2b80c8#code) |
+| SenateGovernor (Uniswap) | [0xC966383b6cf98f6995285Df798a451a8dC66AF81](https://sepolia.etherscan.io/address/0xC966383b6cf98f6995285Df798a451a8dC66AF81#code) |
+| SenateRiskOracle | [0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D](https://sepolia.etherscan.io/address/0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D#code) |
+
+### Tenderly Explorer Links
+
+- [Tenderly Virtual TestNet Explorer](https://dashboard.tenderly.co/explorer/vnet/e9d3fd02-270b-4e10-847f-db1f59922429)
+
+-----------
+-----------
+-----------
+
 ## The Problem: Governance Proposals Are a Blind Spot
 
 DeFi protocols are governed by on-chain proposals — executable code that can move treasury funds, change interest rates, or grant minting authority.
