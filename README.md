@@ -1,20 +1,5 @@
 # SENATE AI — Simulated ENvironment for Autonomous Token Evaluation
 
-![Proposal Analysis — Tenderly simulation results, attack pattern detection, risk score, and agent votes](assets/proposal-analysis.png)
-<p align="center"><em>Proposal Analysis — Tenderly simulation metrics, historical attack pattern matching, and AI agent voting</em></p>
-
-![AI Senate Debate — Multi-agent debate with opening statements, chairperson review, and counter-arguments](assets/ai-debate.png)
-<p align="center"><em>AI Senate Debate — Structured multi-phase debate with vote changes after cross-examination</em></p>
-
-![SENATE Pipeline — 7-step CRE workflow from proposal submission to on-chain report](assets/pipeline-steps.png)
-<p align="center"><em>SENATE Pipeline — 7-step CRE workflow from Tenderly simulation to on-chain report publishing</em></p>
-
-![CRE Terminal — Chainlink CRE workflow simulation output with DON-signed report](assets/cre-terminal.png)
-<p align="center"><em>CRE Terminal — Live Chainlink CRE workflow execution with final verdict and risk score</em></p>
-
-![On-Chain Reports — DON-verified governance analysis reports published via Chainlink CRE](assets/onchain-reports.png)
-<p align="center"><em>On-Chain Reports — DON-verified governance reports with risk scores and on-chain tx hashes</em></p>
-
 -----------
 -----------
 -----------
@@ -61,6 +46,21 @@
 -----------
 -----------
 -----------
+
+![Proposal Analysis — Tenderly simulation results, attack pattern detection, risk score, and agent votes](assets/proposal-analysis.png)
+<p align="center"><em>Proposal Analysis — Tenderly simulation metrics, historical attack pattern matching, and AI agent voting</em></p>
+
+![AI Senate Debate — Multi-agent debate with opening statements, chairperson review, and counter-arguments](assets/ai-debate.png)
+<p align="center"><em>AI Senate Debate — Structured multi-phase debate with vote changes after cross-examination</em></p>
+
+![SENATE Pipeline — 7-step CRE workflow from proposal submission to on-chain report](assets/pipeline-steps.png)
+<p align="center"><em>SENATE Pipeline — 7-step CRE workflow from Tenderly simulation to on-chain report publishing</em></p>
+
+![CRE Terminal — Chainlink CRE workflow simulation output with DON-signed report](assets/cre-terminal.png)
+<p align="center"><em>CRE Terminal — Live Chainlink CRE workflow execution with final verdict and risk score</em></p>
+
+![On-Chain Reports — DON-verified governance analysis reports published via Chainlink CRE](assets/onchain-reports.png)
+<p align="center"><em>On-Chain Reports — DON-verified governance reports with risk scores and on-chain tx hashes</em></p>
 
 ## The Problem: Governance Proposals Are a Blind Spot
 
