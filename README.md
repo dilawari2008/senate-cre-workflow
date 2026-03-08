@@ -6,6 +6,12 @@
 
 ## Submission Requirements
 
+### Demo Link
+
+- [Project Demo Video](https://drive.google.com/file/d/1Kh5wUfUBotGJiCLSjYxjQXSlOdlp-LkQ/view)
+
+*Note: No dummy data was used. Actual transaction hashes and output from Gemini API calls are shown in the demo.*
+
 ### Tenderly Explorer Links
 
 - [Tenderly Virtual TestNet Explorer](https://dashboard.tenderly.co/explorer/vnet/e9d3fd02-270b-4e10-847f-db1f59922429)
