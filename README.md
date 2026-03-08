@@ -1,10 +1,22 @@
 # SENATE AI — Simulated ENvironment for Autonomous Token Evaluation
 
+![Proposal Analysis — Tenderly simulation results, attack pattern detection, risk score, and agent votes](assets/proposal-analysis.png)
+*Proposal Analysis — Tenderly simulation metrics, historical attack pattern matching, and AI agent voting*
+
+![AI Senate Debate — Multi-agent debate with opening statements, chairperson review, and counter-arguments](assets/ai-debate.png)
+*AI Senate Debate — Structured multi-phase debate with vote changes after cross-examination*
+
+![CRE Terminal — Chainlink CRE workflow simulation output with DON-signed report](assets/cre-terminal.png)
+*CRE Terminal — Live Chainlink CRE workflow execution with final verdict and risk score*
+
+![On-Chain Reports — DON-verified governance analysis reports published via Chainlink CRE](assets/onchain-reports.png)
+*On-Chain Reports — DON-verified governance reports with risk scores and on-chain tx hashes*
+
 -----------
 -----------
 -----------
 
-## Submissions
+## Submission Requirements
 
 ### Tenderly Explorer Links
 
