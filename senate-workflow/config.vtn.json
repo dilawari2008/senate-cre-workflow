@@ -1,0 +1,17 @@
+{
+  "tenderlyAccount": "dilawaridev",
+  "tenderlyProject": "cre-hackathon",
+  "geminiModel": "gemini-2.5-flash",
+  "webhookUrl": "http://localhost:3000/api/webhook/cre",
+  "senateGovernorAddress": "0x212d332EAB63A0FA9754d386596f43c9Ad27C07c",
+  "senateRiskOracleAddress": "0x00A9EaF180969488f5b5753fa4014cbDf8536344",
+  "riskStaleThresholdSeconds": 86400,
+  "vtnRpcUrl": "https://virtual.mainnet.eu.rpc.tenderly.co/22d1f719-0466-4639-847f-f7c35c8d33d3",
+  "evms": [
+    {
+      "chainSelectorName": "ethereum-testnet-sepolia",
+      "senateReportAddress": "0x195FA537B17734Bb4fDEE405146dAb5F9Dca72be",
+      "gasLimit": "500000"
+    }
+  ]
+}

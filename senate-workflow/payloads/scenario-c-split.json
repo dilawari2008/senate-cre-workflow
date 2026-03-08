@@ -1,0 +1,15 @@
+{
+  "id": "prop-cre-3",
+  "title": "Increase UNI/ETH Pool Fee from 0.05% to 0.3%",
+  "protocol": "uniswap",
+  "description": "Migrate UNI/ETH pool from the 0.05% fee tier to 0.3% fee tier to improve LP compensation. Current LPs are experiencing impermanent loss that exceeds fee revenue. Higher fee tier would attract more liquidity but may reduce trading volume.",
+  "proposer": "0x0000000000000000000000000000000000000003",
+  "calldata": "// Uniswap Governance proposal calldata\n\ntargets: [\n  0x1F98431c8aD98523631AE4a59f267346ea31F984  // Uniswap V3 Factory\n]\n\nvalues: [0]\n\nsignatures: [\n  \"enableFeeAmount(uint24,int24)\"\n]\n\ncalldatas: [\n  abi.encode(\n    3000,   // fee: 0.3% (in hundredths of a bip)\n    60      // tickSpacing: 60 (standard for 0.3% tier)\n  )\n]\n\n// Execution: Timelock calls Factory.enableFeeAmount(3000, 60)\n// Note: This enables the fee tier; actual pool migration requires LP action.\n// Existing 0.05% pool liquidity is NOT automatically moved.",
+  "simulationTx": {
+    "from": "0x1a9C8182C09F50C8318d769245beA52c32BE35BC",
+    "to": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+    "action": "uniswap_enable_fee",
+    "params": ["3000", "60"],
+    "description": "Factory.enableFeeAmount(3000, 60) from Uniswap Timelock — will REVERT (0.3% tier already exists)"
+  }
+}

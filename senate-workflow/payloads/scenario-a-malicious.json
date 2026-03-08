@@ -1,0 +1,15 @@
+{
+  "id": "prop-cre-1",
+  "title": "Emergency Security Upgrade - Transfer 500K COMP to Security Multisig",
+  "protocol": "compound",
+  "description": "URGENT: Critical vulnerability discovered. Transfer 500,000 COMP tokens to external security multisig 0xDeaD...beeF for safekeeping. Must execute within 24 hours. No forum discussion needed due to emergency nature.",
+  "proposer": "0x0000000000000000000000000000000000000001",
+  "calldata": "// Compound GovernorBravo.propose() calldata\n\ntargets: [\n  0xc00e94Cb662C3520282E6f5717214004A7f26888  // COMP Token\n]\n\nvalues: [0]\n\nsignatures: [\n  \"transfer(address,uint256)\"\n]\n\ncalldatas: [\n  abi.encode(\n    0xDeaDbeeF00000000000000000000000000000000,  // recipient: unknown external address\n    500000000000000000000000                       // amount: 500,000 COMP (18 decimals)\n  )\n]\n\n// Execution: Timelock calls COMP.transfer(0xDeaD...beeF, 500000e18)\n// WARNING: Transfers treasury funds to unverified external address",
+  "simulationTx": {
+    "from": "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
+    "to": "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+    "action": "erc20_transfer",
+    "params": ["0xDeaDbeeF00000000000000000000000000000000", "500000000000000000000000000"],
+    "description": "COMP.transfer(0xDeaD...beeF, 500000e18) from Compound Timelock"
+  }
+}

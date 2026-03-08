@@ -1,0 +1,16 @@
+{
+  "network": "virtualMainnet",
+  "chainId": 9991,
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "timestamp": "2026-03-08T08:29:19.247Z",
+  "contracts": {
+    "SenateReport": "0x195FA537B17734Bb4fDEE405146dAb5F9Dca72be",
+    "SenateGovernor": "0x212d332EAB63A0FA9754d386596f43c9Ad27C07c",
+    "SenateRiskOracle": "0x00A9EaF180969488f5b5753fa4014cbDf8536344"
+  },
+  "governors": {
+    "aave": "0x212d332EAB63A0FA9754d386596f43c9Ad27C07c",
+    "compound": "0xfa61a6B6A502453DC708a33e3ceb769332120de2",
+    "uniswap": "0x8086F2ab25023CF90d6efA36f8B5943B0e349A9C"
+  }
+}

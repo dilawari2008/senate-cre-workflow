@@ -1,0 +1,42 @@
+# ==========================================================================
+# CRE WORKFLOW SETTINGS FILE — SENATE
+# ==========================================================================
+# Workflow-specific settings for CRE CLI targets.
+# Settings here override CRE Project Settings File values.
+
+# ==========================================================================
+# DEFAULT: Tenderly Virtual TestNet — uses VTN-deployed contract addresses
+vtn-simulation:
+  user-workflow:
+    workflow-name: "senate-workflow-vtn"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "../config.vtn.json"
+    secrets-path: "../secrets.yaml"
+
+# ==========================================================================
+local-simulation:
+  user-workflow:
+    workflow-name: "senate-workflow-local"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "../config.local.json"
+    secrets-path: "../secrets.yaml"
+
+# ==========================================================================
+staging-settings:
+  user-workflow:
+    workflow-name: "senate-workflow-staging"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "../config.staging.json"
+    secrets-path: "../secrets.yaml"
+
+# ==========================================================================
+production-settings:
+  user-workflow:
+    workflow-name: "senate-workflow-production"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "../config.staging.json"
+    secrets-path: "../secrets.yaml"

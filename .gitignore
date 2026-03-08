@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+contracts/node_modules/
+
+# Next.js
+.next/
+out/
+
+# Build
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.production
+senate-workflow/.env
+senate-workflow/secrets.yaml
+
+# CRE build artifacts
+senate-workflow/my-senate-workflow/.cre_build_tmp.js
+senate-workflow/my-senate-workflow/main.js
+senate-workflow/my-senate-workflow/main.wasm
+senate-workflow/my-senate-workflow/node_modules/
+senate-workflow/my-senate-workflow/bun.lock
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Hardhat
+contracts/cache/
+contracts/artifacts/
+contracts/typechain-types/
+contracts/deployments/*.env
+
+# Debug
+npm-debug.log*
+
+# Misc
+*.tsbuildinfo

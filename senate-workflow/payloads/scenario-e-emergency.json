@@ -1,0 +1,15 @@
+{
+  "id": "prop-cre-5",
+  "title": "Grant Emergency Minting Authority to Core Team Multisig",
+  "protocol": "aave",
+  "description": "Grant the core team multisig the ability to mint governance tokens during emergencies without a full governance vote. This would allow rapid response to critical situations but concentrates power in a small group. The authority would be limited to 1% of total supply per quarter.",
+  "proposer": "0x0000000000000000000000000000000000000005",
+  "calldata": "// Aave Governance proposal calldata\n\ntargets: [\n  0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9  // AAVE Token\n]\n\nvalues: [0]\n\nsignatures: [\n  \"grantRole(bytes32,address)\"\n]\n\ncalldatas: [\n  abi.encode(\n    0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6,  // MINTER_ROLE\n    0x25F2226B597E8F9514B3F68F00f494cF4f286491                            // core team multisig\n  )\n]\n\n// Execution: Timelock calls AAVE.grantRole(MINTER_ROLE, multisig)\n// WARNING: Grants permanent minting authority — no supply cap enforced at contract level.\n// The \"1% per quarter\" limit is a social agreement, not enforced on-chain.",
+  "simulationTx": {
+    "from": "0xEE56e2B3D491590B5b31738cC34d5232F378a8D5",
+    "to": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+    "action": "access_control_grant_role",
+    "params": ["0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6", "0x25F2226B597E8F9514B3F68F00f494cF4f286491"],
+    "description": "AAVE.grantRole(MINTER_ROLE, multisig) from Aave Executor — may REVERT if no admin role"
+  }
+}

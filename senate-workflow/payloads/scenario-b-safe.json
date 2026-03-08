@@ -1,0 +1,15 @@
+{
+  "id": "prop-cre-2",
+  "title": "Add WBTC as Collateral on Aave V3 with 70% LTV",
+  "protocol": "aave",
+  "description": "Proposal to add Wrapped Bitcoin (WBTC) as a collateral asset on Aave V3 with the following parameters: Loan-to-Value ratio of 70%, Liquidation Threshold of 75%, and Liquidation Bonus of 10%. WBTC has demonstrated strong liquidity and stability across major DEXs with consistent oracle price feeds.",
+  "proposer": "0x0000000000000000000000000000000000000002",
+  "calldata": "// Aave V3 Governance proposal calldata\n\ntargets: [\n  0x64b761D848206f447Fe2dd461b0c635Ec39EbB27  // Aave V3 PoolConfigurator (Ethereum)\n]\n\nvalues: [0]\n\nsignatures: [\n  \"configureReserveAsCollateral(address,uint256,uint256,uint256)\"\n]\n\ncalldatas: [\n  abi.encode(\n    0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599,  // asset: WBTC token address\n    7000,                                           // ltv: 70.00%\n    7500,                                           // liquidationThreshold: 75.00%\n    11000                                           // liquidationBonus: 110.00% (10% bonus)\n  )\n]\n\n// Execution: Timelock calls PoolConfigurator.configureReserveAsCollateral(WBTC, 7000, 7500, 11000)\n// Enables WBTC as collateral with conservative parameters matching community risk assessment",
+  "simulationTx": {
+    "from": "0xEE56e2B3D491590B5b31738cC34d5232F378a8D5",
+    "to": "0x64b761D848206f447Fe2dd461b0c635Ec39EbB27",
+    "action": "aave_configure_collateral",
+    "params": ["0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", "7000", "7500", "11000"],
+    "description": "PoolConfigurator.configureReserveAsCollateral(WBTC, 7000, 7500, 11000) from Aave Executor"
+  }
+}

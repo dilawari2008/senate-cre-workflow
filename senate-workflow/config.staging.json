@@ -1,0 +1,16 @@
+{
+  "tenderlyAccount": "dilawaridev",
+  "tenderlyProject": "cre-hackathon",
+  "geminiModel": "gemini-2.5-flash",
+  "webhookUrl": "http://localhost:3000/api/webhook/cre",
+  "senateGovernorAddress": "0x_DEPLOYED_ON_SEPOLIA",
+  "senateRiskOracleAddress": "0x_DEPLOYED_ON_SEPOLIA",
+  "riskStaleThresholdSeconds": 86400,
+  "evms": [
+    {
+      "chainSelectorName": "ethereum-testnet-sepolia",
+      "senateReportAddress": "0x_DEPLOYED_ON_SEPOLIA",
+      "gasLimit": "500000"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "prop-cre-4",
+  "title": "Reduce USDC Reserve Factor from 15% to 10% on Compound",
+  "protocol": "compound",
+  "description": "Reduce the USDC reserve factor from 15% to 10% on Compound V3 to improve competitiveness against Aave and other lending protocols. This would increase USDC supply APY by approximately 0.5% while slightly reducing protocol reserves. Community discussion has been ongoing for 2 weeks with broad support.",
+  "proposer": "0x0000000000000000000000000000000000000004",
+  "calldata": "// Compound V2 cUSDC proposal calldata\n\ntargets: [\n  0x39AA39c021dfbaE8faC545936693aC917d5E7563  // cUSDC (Compound V2)\n]\n\nvalues: [0]\n\nsignatures: [\n  \"_setReserveFactor(uint256)\"\n]\n\ncalldatas: [\n  abi.encode(\n    100000000000000000  // 10% = 0.1 * 1e18 mantissa\n  )\n]\n\n// Execution: Timelock calls cUSDC._setReserveFactor(1e17)\n// Reduces protocol revenue share from 15% to 10%, increasing supplier yield",
+  "simulationTx": {
+    "from": "0x6d903f6003cca6255D85CcA4D3B5E5146dC33925",
+    "to": "0x39AA39c021dfbaE8faC545936693aC917d5E7563",
+    "action": "compound_set_reserve_factor",
+    "params": ["100000000000000000"],
+    "description": "cUSDC._setReserveFactor(1e17) from Compound Timelock"
+  }
+}
