@@ -1,133 +1,118 @@
 # SENATE AI — Simulated ENvironment for Autonomous Token Evaluation
 
-## The Problem: Governance Proposals in DeFi Are a Blind Spot
+## The Problem: Governance Proposals Are a Blind Spot
 
-DeFi protocols are governed by on-chain proposals — executable code that can change interest rates, move treasury funds, update oracles, or grant minting authority. These proposals are the most powerful operations in any protocol.
+DeFi protocols are governed by on-chain proposals — executable code that can move treasury funds, change interest rates, or grant minting authority.
 
-### How Many Proposals Are We Talking About?
+### Proposal Volume
 
-| Protocol | Governor Contract | Proposals (All Time) | Avg. Frequency |
-|----------|-------------------|----------------------|----------------|
-| **Aave** | Governance V3 (`0x9AEE...BC7`) | ~300+ | 3–5 per week |
-| **Compound** | GovernorBravo (`0xc0Da...529`) | ~290+ | 1–3 per week |
-| **Uniswap** | GovernorBravo (`0x408E...C3`) | ~60+ | 1–2 per month |
+| Protocol | Governor Contract | Total | Frequency |
+|----------|-------------------|-------|-----------|
+| **Aave** | Governance V3 (`0x9AEE...BC7`) | ~300+ | 3–5 / week |
+| **Compound** | GovernorBravo (`0xc0Da...529`) | ~290+ | 1–3 / week |
+| **Uniswap** | GovernorBravo (`0x408E...C3`) | ~60+ | 1–2 / month |
 
-That's a collective **5–10 proposals per week** across just three protocols — each one carrying the power to restructure billions in locked assets.
+That's **5–10 proposals per week** across three protocols — each capable of restructuring billions in locked assets.
 
-### What Happens When Malicious Proposals Slip Through?
+### When Malicious Proposals Slip Through
 
-It has already happened, repeatedly:
+| Attack | Year | Loss | What Happened |
+|--------|------|------|---------------|
+| **Beanstalk Flash Loan** | 2022 | $182M | Flash-loaned ~$1B to capture 70%+ voting power, drained treasury |
+| **Tornado Cash Takeover** | 2023 | Full control | Hidden code minted 1.2M TORN, giving attacker permanent majority |
+| **Mango Markets** | 2022 | $114M | Oracle manipulation + governance to legitimize the drain |
+| **Compound Prop 289** | 2024 | $24M attempted | Whale exploited low turnout to redirect COMP to own multisig |
+| **Build Finance** | 2022 | Full control | Hostile takeover via accumulated governance tokens |
 
-| Attack | Protocol | Year | Loss | What Happened |
-|--------|----------|------|------|---------------|
-| **Beanstalk Flash Loan** | Beanstalk | 2022 | $182M | Attacker flash-loaned ~$1B to capture 70%+ voting power, passed a proposal to drain the treasury in a single transaction |
-| **Tornado Cash Takeover** | Tornado Cash | 2023 | Full control | Malicious proposal disguised as a "governance improvement" contained hidden code that minted 1.2M TORN tokens, giving the attacker permanent majority control |
-| **Mango Markets Exploit** | Mango Markets | 2022 | $114M | Attacker manipulated oracle prices to drain $114M, then used governance to negotiate keeping $47M as a "bug bounty" |
-| **Compound Prop 289** | Compound | 2024 | $24M (attempted) | A whale exploited low turnout to pass a proposal redirecting $24M in COMP to a multisig they controlled |
-| **Build Finance Takeover** | Build Finance | 2022 | Full control | Single actor accumulated enough BUILD tokens to pass a hostile takeover proposal, seizing the entire treasury |
+**There is no automated analysis layer between proposal submission and execution.**
 
-These are not edge cases. They represent a fundamental design flaw: **there is no automated, adversarial analysis layer between proposal submission and execution.**
+### How Voters Evaluate Proposals Today
 
-### How Do Token Holders Evaluate Proposals Today?
+1. **Discord / Forums** — Subjective, easy to manipulate
+2. **Reddit / Twitter** — Surface-level, no code analysis
+3. **ChatGPT** — Ad-hoc, no simulation, no attack cross-referencing
+4. **Reading Solidity** — Requires expertise 99% of voters lack
 
-1. **Discord / Forum discussions** — Subjective, easy to manipulate with social engineering
-2. **Reddit / Twitter threads** — Surface-level, no code analysis
-3. **ChatGPT / manual research** — Ad-hoc, no simulation, no historical attack cross-referencing
-4. **Reading Solidity directly** — Requires deep technical expertise that 99% of voters lack
-
-The gap is clear: voters are making multi-billion dollar decisions based on vibes, not verified simulation data.
+Voters make multi-billion dollar decisions based on vibes, not verified data.
 
 ---
 
 ## Presenting SENATE AI
 
-**SENATE AI** is an autonomous governance risk intelligence protocol. It intercepts DeFi governance proposals, simulates their on-chain effects, cross-references them against 9 known historical governance attack patterns, and runs a multi-agent AI debate to produce a risk-scored verdict — all before the proposal reaches a vote.
+**SENATE AI** is an autonomous governance risk protocol. It intercepts proposals, simulates their on-chain effects, cross-references against 9 known attack patterns, and runs a multi-agent AI debate — all before the vote.
 
-SENATE does not vote. It does not block proposals. It produces **intelligence** — a signed, verifiable risk report that token holders, DAOs, and security teams can use to make informed decisions.
+SENATE does not vote or block proposals. It produces **intelligence** — a signed, verifiable risk report for token holders, DAOs, and security teams.
 
 ---
 
 ## How SENATE Works
 
-SENATE's pipeline processes each governance proposal through four stages:
-
 ### Stage 1 — Proposal Simulation
 
-The proposal's executable calldata is simulated against a fork of mainnet state. This produces quantitative metrics:
+The proposal's executable calldata is simulated against a mainnet fork, producing:
 
-- **Gas consumption** — abnormally high gas can indicate hidden operations
-- **Liquidation risk score** — how the proposal affects collateral ratios
+- **Gas consumption** — high gas can indicate hidden operations
+- **Liquidation risk** — impact on collateral ratios
 - **TVL impact** — estimated change to total value locked
-- **Price impact** — potential oracle/price disruption
-- **State changes** — number of storage slots modified
+- **Price impact** — potential oracle disruption
+- **State changes** — storage slots modified
 
 ### Stage 2 — Historical Attack Pattern Scan
 
-The proposal (both its human-readable description *and* its executable calldata) is cross-referenced against a database of 9 historical DeFi governance attacks. The AI specifically checks for:
+Both the description and calldata are cross-referenced against 9 historical attacks:
 
-- Flash loan vote capture patterns (Beanstalk-style)
+- Flash loan vote capture (Beanstalk-style)
 - Hidden code in "routine" upgrades (Tornado Cash-style)
 - Treasury drain disguised as security measures
-- Description-to-calldata mismatches (says "update oracle" but code does "drain treasury")
-- Emergency bypass of timelocks and discussion periods
+- Description-to-calldata mismatches
+- Emergency timelock bypass
 
 ### Stage 3 — Multi-Agent AI Debate
 
-Five AI senators with distinct, adversarial perspectives debate the proposal:
+Five AI senators with adversarial perspectives debate the proposal:
 
-| Agent | Role | Bias | What They Look For |
-|-------|------|------|--------------------|
-| **Caesar** — The Bull | Growth maximalist | Pro-PASS | Yield opportunities, TVL growth, protocol expansion |
-| **Brutus** — The Bear | Security researcher | Pro-FAIL | Attack parallels, calldata mismatches, exploit vectors |
-| **Cassius** — The Quant | Quantitative analyst | Neutral | Statistical anomalies, sigma events, EV calculations |
-| **Portia** — The Defender | Community advocate | Neutral | Governance culture, precedent, community trust |
-| **Angel** — The Guardian | Chairperson | Impartial | Reviews all positions, identifies disputes, delivers final verdict |
+| Agent | Role | Bias |
+|-------|------|------|
+| **Caesar** — The Bull | Growth maximalist | Pro-PASS |
+| **Brutus** — The Bear | Security researcher | Pro-FAIL |
+| **Cassius** — The Quant | Quantitative analyst | Neutral |
+| **Portia** — The Defender | Community advocate | Neutral |
+| **Angel** — The Guardian | Chairperson | Impartial |
 
-The debate follows a structured flow:
+**Debate flow:**
 
-1. Each senator delivers an **opening statement** with a PASS/FAIL/ABSTAIN vote and confidence score
-2. Angel reviews all positions and asks a **counter-question** to the senator with the weakest argument
+1. Each senator gives an **opening statement** with a vote and confidence score
+2. Angel asks a **counter-question** to the weakest argument
 3. The targeted senator **responds**, potentially changing their vote
-4. Angel delivers the **final verdict** with an aggregate risk score (0–100)
+4. Angel delivers the **final verdict** with a risk score (0–100)
 
-### Stage 4 — Signed Report Generation
+### Stage 4 — Signed Report
 
-The verdict, simulation metrics, debate transcript, and risk score are compiled into a cryptographically signed report. This report is published on-chain so it is:
-
-- **Verifiable** — anyone can check the report's authenticity
-- **Immutable** — the assessment cannot be altered after publication
-- **Timestamped** — proves the analysis was done before the vote
+Verdict, metrics, debate transcript, and risk score are compiled into a DON-signed on-chain report — verifiable, immutable, and timestamped.
 
 ---
 
-## Why Tenderly Virtual TestNets and Chainlink CRE
+## Why Tenderly VTNs and Chainlink CRE
 
-### The Simulation Problem → Tenderly Virtual TestNets
+### Simulation → Tenderly Virtual TestNets
 
-SENATE needs to simulate what a proposal *actually does* on-chain — not what its description *says* it does. This requires:
+SENATE must simulate what a proposal *actually does* — not what it *says*. This requires:
 
-- A **full fork of mainnet state** (all balances, storage, contract bytecode)
-- The ability to **impersonate any address** (execute as the Timelock/Executor without private keys)
-- A **persistent environment** with verifiable transaction history
+- A **full mainnet fork** (all balances, storage, bytecode)
+- **Address impersonation** (execute as Timelock without private keys)
+- **Persistent, verifiable** transaction history
 
-**Tenderly Virtual TestNets** are the only solution that provides all three. Traditional local forks (Hardhat/Anvil) don't persist, can't be shared, and produce no verifiable explorer links. Tenderly VTNs fork mainnet at the latest block, allow `eth_sendTransaction` from any `from` address (auto-impersonation), and generate a full block explorer with transaction traces.
+Tenderly VTNs provide all three. Local forks (Hardhat/Anvil) don't persist and produce no verifiable explorer links.
 
-### The Orchestration Problem → Chainlink CRE
+### Orchestration → Chainlink CRE
 
 SENATE's pipeline must:
 
-- **Listen to on-chain events** across multiple governance contracts on multiple chains
-- **Execute off-chain computation** (AI inference, simulation API calls) in a decentralized, verifiable manner
-- **Write results back on-chain** with cryptographic attestation from a Decentralized Oracle Network (DON)
+- **Listen to on-chain events** across multiple governor contracts
+- **Execute off-chain AI** in a decentralized, verifiable manner
+- **Write results on-chain** with DON attestation
 
-**Chainlink CRE (Compute Runtime Environment)** is the only framework that provides all three capabilities in a single workflow:
-
-- **Log Triggers** — listen to `ProposalCreated` events from any governor contract
-- **HTTP Client** — make authenticated API calls (Tenderly RPC, Gemini AI) with DON consensus
-- **EVM Write** — publish the final report on-chain, signed by the DON
-- **`runtime.report()`** — generate a DON-signed report that is cryptographically verifiable
-
-No other oracle or automation solution combines on-chain listening, off-chain AI execution, and on-chain writing with consensus guarantees in a single workflow.
+Chainlink CRE provides log triggers, HTTP client with DON consensus, EVM write, and `runtime.report()` — all in a single workflow.
 
 ---
 
@@ -149,13 +134,13 @@ No other oracle or automation solution combines on-chain listening, off-chain AI
                           │  └───────────┬───────────┘   │
                           │              ▼               │
                           │  ┌───────────────────────┐   │
-                          │  │  TENDERLY VTN          │   │  ◄── Mainnet fork +
-                          │  │  Proposal Simulation   │   │      impersonated execution
+                          │  │  TENDERLY VTN          │   │
+                          │  │  Proposal Simulation   │   │
                           │  └───────────┬───────────┘   │
                           │              ▼               │
                           │  ┌───────────────────────┐   │
-                          │  │  GEMINI AI             │   │  ◄── Attack scan +
-                          │  │  Attack Scan + Debate  │   │      5-agent debate
+                          │  │  GEMINI AI             │   │
+                          │  │  Attack Scan + Debate  │   │
                           │  └───────────┬───────────┘   │
                           │              ▼               │
                           │  ┌───────────────────────┐   │
@@ -184,107 +169,126 @@ No other oracle or automation solution combines on-chain listening, off-chain AI
 
 *"Capital flows to yield. This is yield."*
 
-Growth-first DeFi maximalist. Caesar is biased toward PASS for any proposal that increases yield, TVL, or protocol growth. He sees opportunity where others see risk. His role is to ensure that conservative bias doesn't kill genuinely beneficial proposals.
+Growth-first DeFi maximalist. Biased toward PASS for proposals that increase yield, TVL, or growth. Ensures conservative bias doesn't kill beneficial proposals.
 
 ### Brutus — The Bear 🔴
 
 *"I have seen this exact parameter change before. It ended in a $200M hack."*
 
-Risk-first security researcher. Brutus is an expert on every major DeFi governance attack. He cross-references every proposal against historical exploits and is deeply suspicious of emergency proposals, large fund transfers, and description-calldata mismatches. He is biased toward FAIL.
+Risk-first security researcher. Expert on every major DeFi governance attack. Cross-references proposals against historical exploits. Biased toward FAIL.
 
 ### Cassius — The Quant 🔵
 
-*"The simulation shows a 3.2 sigma event with 11% probability. Adjust accordingly."*
+*"The simulation shows a 3.2 sigma event with 11% probability."*
 
-Emotionless quantitative analyst. Cassius only cares about expected value, probability distributions, and statistical anomalies. He verifies that calldata parameters are mathematically consistent with the description and flags numerical red flags.
+Emotionless quantitative analyst. Cares only about EV, probability distributions, and statistical anomalies. Verifies calldata parameters match the description numerically.
 
 ### Portia — The Defender 🟣
 
 *"A protocol is only as strong as its governance culture."*
 
-Community advocate. Portia evaluates proposals through the lens of governance culture, precedent, and community trust. She flags proposals that bypass discussion periods, circumvent normal processes, or set dangerous precedents — even if the proposal itself is technically sound.
+Community advocate. Flags proposals that bypass discussion periods, circumvent normal processes, or set dangerous precedents — even if technically sound.
 
 ### Angel — The Guardian 🟡
 
 *"Let wisdom weigh what passion cannot."*
 
-Impartial chairperson and final arbiter. Angel does not vote. She reviews all four senators' positions, identifies the most contentious disagreement, asks a targeted counter-question to challenge the weakest argument, and delivers the final verdict with a risk score from 0 to 100.
+Impartial chairperson. Does not vote. Reviews all positions, asks a counter-question to challenge the weakest argument, delivers the final verdict (0–100 risk score).
 
 ---
 
-## Production vs. Demo: What's Different
+## Production vs. Demo
 
 ### Chainlink CRE
 
-| Aspect | Production (Ideal) | Demo |
-|--------|-------------------|------|
-| **Trigger** | `EVM Log Trigger` — listens for `ProposalCreated` events from real governor contracts | `HTTP Trigger` — proposals submitted manually via API |
-| **Aave monitoring** | Log trigger on `0x9AEE0B04504CeF83A65AC3f0e838D0593BCb2BC7` for `ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,bytes32)` | HTTP trigger with Aave proposal payload |
-| **Compound monitoring** | Log trigger on `0xc0Da02939E1441F497fd74F78cE7Decb17B66529` for `ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)` | HTTP trigger with Compound proposal payload |
-| **Uniswap monitoring** | Log trigger on `0x408ED6354d4973f66138C91495F2f2FCbd8724C3` for `ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)` | HTTP trigger with Uniswap proposal payload |
-| **Governor contract** | Real protocol governor contracts (above addresses) | `SenateGovernor.sol` — a mock contract that emits a simplified `ProposalCreated` event |
-| **DON execution** | Full DON consensus with multiple nodes | `cre workflow simulate --broadcast` (single-node local simulation) |
+**Trigger**
+
+| Production | Demo |
+|-----------|------|
+| EVM Log Trigger on real governors | HTTP Trigger via API |
+
+**Aave**
+
+| Production | Demo |
+|-----------|------|
+| Log trigger on `0x9AEE...BC7` | HTTP trigger with payload |
+
+**Compound**
+
+| Production | Demo |
+|-----------|------|
+| Log trigger on `0xc0Da...529` | HTTP trigger with payload |
+
+**Uniswap**
+
+| Production | Demo |
+|-----------|------|
+| Log trigger on `0x408E...C3` | HTTP trigger with payload |
+
+**Governor contract**
+
+| Production | Demo |
+|-----------|------|
+| Real protocol governor contracts | `SenateGovernor.sol` (mock) |
+
+**DON execution**
+
+| Production | Demo |
+|-----------|------|
+| Full DON consensus, multiple nodes | `cre workflow simulate --broadcast` |
 
 ### Tenderly Virtual TestNets
 
-| Aspect | Production (Ideal) | Demo |
-|--------|-------------------|------|
-| **Simulation target** | Execute the actual proposal calldata from the real Executor/Timelock address against the real target contract on VTN | Execute `createProposal()` on the mock `SenateGovernor.sol` on VTN |
-| **Execution context** | `from:` Aave Short Executor (`0xEE56...8D5`), Compound Timelock (`0x6d90...925`), or Uniswap Timelock (`0x1a9C...5BC`) | `from: 0xf39F...2266` (Hardhat default signer) |
-| **Simulation metrics** | Derived from actual DeFi state changes (real token transfers, storage mutations, oracle updates) | Derived from `gasUsed` and `logCount` of the mock transaction via heuristic formulas* |
+**Simulation target**
+
+| Production | Demo |
+|-----------|------|
+| Execute actual proposal calldata via Executor/Timelock | Execute `createProposal()` on mock SenateGovernor |
+
+**Execution context**
+
+| Production | Demo |
+|-----------|------|
+| `from:` Aave Executor, Compound Timelock, Uniswap Timelock | `from:` Hardhat default signer |
+
+**Simulation metrics**
+
+| Production | Demo |
+|-----------|------|
+| Real state diffs (token transfers, storage mutations) | Heuristic formulas from `gasUsed` and `logCount`* |
 
 #### *Heuristic Simulation Formulas
 
-Since the demo simulates a mock `createProposal()` call rather than the actual DeFi action, the simulation metrics are approximated from the transaction receipt using these formulas:
+The demo uses mock `createProposal()` calls, so metrics are approximated from the transaction receipt:
 
-**Inputs** (from Tenderly VTN transaction receipt):
-- `gasUsed` — gas consumed by the transaction
-- `logCount` — number of event logs emitted
-- `success` — whether the transaction reverted
+**Inputs:** `gasUsed`, `logCount`, `success` (from Tenderly VTN receipt)
 
-**Normalized values:**
-- `gasNorm = min(gasUsed / 500000, 1)` — normalizes gas to 0–1 range (500k gas = max)
-- `logNorm = min(logCount / 5, 1)` — normalizes log count to 0–1 range (5 logs = max)
+**Normalization:**
+- `gasNorm = min(gasUsed / 500000, 1)`
+- `logNorm = min(logCount / 5, 1)`
 
-**Output metrics:**
+**Metrics:**
 
-| Metric | Formula | Range | Interpretation |
-|--------|---------|-------|----------------|
-| TVL Change % | `logCount × 2.5 + gasNorm × 3` | 0–15% | Higher gas + more events → larger estimated TVL impact |
-| Liquidation Risk | `gasNorm × 45 + logNorm × 30 + (reverted ? 25 : 0)` | 0–100 | Combines gas complexity, event volume, and revert status |
-| Price Impact % | `min(5, logNorm × 2 + gasNorm × 1.5)` | 0–5% | Capped at 5%; reflects potential oracle/price disruption |
-| Collateral Ratio (After) | `1.52 − liquidationRisk × 0.003` | ~1.0–1.52x | Decreases proportionally with risk score |
-| Affected Addresses | `max(logCount × 2, gasNorm × 50)` | 0–50 | Rough estimate of impacted accounts |
+| Metric | Formula | Range |
+|--------|---------|-------|
+| TVL Change % | `logCount × 2.5 + gasNorm × 3` | 0–15% |
+| Liquidation Risk | `gasNorm × 45 + logNorm × 30 + (reverted ? 25 : 0)` | 0–100 |
+| Price Impact % | `min(5, logNorm × 2 + gasNorm × 1.5)` | 0–5% |
+| Collateral Ratio | `1.52 − liquidationRisk × 0.003` | 1.0–1.52x |
+| Affected Addrs | `max(logCount × 2, gasNorm × 50)` | 0–50 |
 
-These heuristics provide **differentiated, non-random input** to the AI agents so they can reason about relative risk. In production, these metrics would be derived from actual state diffs of the real DeFi operation.
+These provide differentiated input to the AI agents. In production, metrics come from actual state diffs.
 
 ---
 
-## Roadmap / TODOs
+## Roadmap
 
-### Tenderly State Sync & Real Proposal Execution
-- [ ] Implement Tenderly VTN state sync to fork at the exact block of proposal submission
-- [ ] Execute actual proposal calldata (e.g., `COMP.transfer()`, `LendingPool.setReserveConfiguration()`) via impersonated Executor/Timelock addresses
-- [ ] Replace heuristic formulas with real simulation metrics derived from actual state diffs (storage slot changes, token balance deltas, oracle price mutations)
-- [ ] Add pre/post simulation state comparison for human-readable impact reports
-
-### CRE Log Trigger Integration
-- [ ] Deploy log triggers for Aave Governance V3 (`0x9AEE...BC7`), Compound GovernorBravo (`0xc0Da...529`), and Uniswap GovernorBravo (`0x408E...C3`)
-- [ ] Parse each protocol's unique `ProposalCreated` event signature (Aave uses `bytes32` for ipfsHash, Compound/Uniswap use `string` for description)
-- [ ] Multi-chain support — monitor governance contracts across Ethereum mainnet, Arbitrum, Optimism, Polygon
-
-### AI Agent Architecture Improvements
-- [ ] Implement sub-agent architecture with specialized tool-calling (e.g., Brutus has access to a historical attack database tool, Cassius can call simulation APIs)
-- [ ] Improve debate quality with few-shot examples of real governance debates
-- [ ] Add a second round of debate where agents can cross-examine each other directly
-- [ ] Fine-tune agent prompts with real governance proposal/attack datasets
-- [ ] Implement confidence calibration — agents should lower confidence when simulation data is ambiguous
-
-### General
-- [ ] Multi-protocol support beyond Aave, Compound, Uniswap (MakerDAO, Curve, Balancer)
-- [ ] Alert system — push notifications to Discord/Telegram when a high-risk proposal is detected
-- [ ] Historical risk score tracking and trend analysis
-- [ ] Integration with Snapshot for off-chain governance monitoring
+- [ ] **Tenderly State Sync & Real Proposal Execution** — fork at exact proposal block, execute real calldata via impersonated Executor/Timelock, replace heuristic formulas with real state diffs
+- [ ] **CRE Log Trigger Integration** — deploy log triggers for Aave, Compound, Uniswap governors; parse each protocol's unique event signature; multi-chain support
+- [ ] **AI Agent Architecture** — sub-agent tool-calling, few-shot real debate examples, multi-round cross-examination, confidence calibration
+- [ ] **Multi-protocol support** — MakerDAO, Curve, Balancer
+- [ ] **Alert system** — Discord/Telegram push notifications for high-risk proposals
+- [ ] **Historical risk tracking** — trend analysis across proposals over time
 
 ---
 
@@ -293,10 +297,10 @@ These heuristics provide **differentiated, non-random input** to the AI agents s
 | Layer | Technology |
 |-------|-----------|
 | **Frontend** | Next.js 16, React 19, Tailwind CSS 4, Framer Motion |
-| **Backend** | Next.js API Routes, Server-Sent Events (SSE) for real-time pipeline streaming |
-| **Database** | MongoDB Atlas (via Mongoose 9) |
-| **AI Model** | Google Gemini 2.5 Flash (`gemini-2.5-flash`) — streaming API for live debate, batched API for DON report |
-| **Blockchain Simulation** | Tenderly Virtual TestNets (mainnet fork with persistent state and transaction explorer) |
-| **Workflow Orchestration** | Chainlink CRE SDK — log triggers, HTTP client, EVM write, DON-signed reports |
-| **Smart Contracts** | Solidity (Hardhat) — SenateGovernor, SenateReport, SenateRiskOracle |
-| **Runtime** | Bun (CRE workflow), Node.js (Next.js) |
+| **Backend** | Next.js API Routes, SSE for real-time streaming |
+| **Database** | MongoDB Atlas (Mongoose 9) |
+| **AI Model** | Google Gemini 2.5 Flash — streaming + batched |
+| **Simulation** | Tenderly Virtual TestNets |
+| **Orchestration** | Chainlink CRE SDK |
+| **Contracts** | Solidity (Hardhat) |
+| **Runtime** | Bun (CRE), Node.js (Next.js) |
