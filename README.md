@@ -8,9 +8,24 @@
 
 ### Chainlink Files
 
+- [`main.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/main.ts) — Workflow entry point. Uses `cre.capabilities.HTTPCapability` (HTTP Trigger), `evmClient.logTrigger` (EVM Log Trigger), `cre.capabilities.CronCapability` (Cron Trigger), `Runner.newRunner`, `getNetwork`
+- [`pipeline.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/pipeline.ts) — 7-step pipeline. Uses `cre.capabilities.HTTPClient` (4 HTTP calls), `cre.capabilities.EVMClient.writeReport` (on-chain write), `runtime.report` + `prepareReportRequest` (DON-signed report), `consensusIdenticalAggregation`
+- [`httpCallback.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/httpCallback.ts) — HTTP trigger handler. Uses `Runtime`, `HTTPPayload`, `decodeJson`
+- [`logCallback.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/logCallback.ts) — EVM log trigger handler. Uses `EVMClient.callContract` (EVM Read), `encodeCallMsg`, `LAST_FINALIZED_BLOCK_NUMBER`, `bytesToHex`, `EVMLog`
+- [`cronCallback.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/cronCallback.ts) — Cron trigger handler. Uses `EVMClient.callContract` (multiple EVM Reads), `CronPayload`, `HTTPClient` (webhook notification)
+- [`gemini.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/gemini.ts) — AI debate + attack scan. Uses `cre.capabilities.HTTPClient` (Gemini API calls), `runtime.getSecret` (secret retrieval), `consensusIdenticalAggregation`
+
 
 
 ### Tenderly Files
+
+- [`pipeline.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/pipeline.ts) — Sends `eth_sendTransaction` to the Tenderly VTN RPC to simulate proposal creation, fetches receipt via `eth_getTransactionReceipt`, extracts `gasUsed` and `logCount` for heuristic risk metrics
+- [`lib/tenderly.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/lib/tenderly.ts) — Creates Tenderly Virtual TestNets via the REST API (`POST /vnets`), runs `POST /simulate` for full transaction simulations, computes TVL change and liquidation risk from state diffs
+- [`contracts/hardhat.config.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/hardhat.config.ts) — Configures `virtualMainnet` network pointing to the Tenderly VTN RPC, uses `@tenderly/hardhat-tenderly` plugin for private contract verification on the VTN explorer
+- [`contracts/scripts/deploy-all.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/scripts/deploy-all.ts) — Deploys SenateReport, SenateGovernor (x3), and SenateRiskOracle to the Tenderly VTN, seeds demo proposals and risk data on VTN
+- [`contracts/scripts/verify-vtn.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/scripts/verify-vtn.ts) — Verifies all deployed contracts on the Tenderly VTN explorer via `hre.tenderly.verify`
+- [`scripts/test-tenderly.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/scripts/test-tenderly.ts) — Tests Tenderly API connectivity, lists VTNs and simulations, runs a test simulation via `POST /simulate`
+- [`scripts/capture-tenderly-links.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/scripts/capture-tenderly-links.ts) — Fetches simulation URLs from MongoDB/API and generates markdown with Tenderly dashboard links
 
 
 
