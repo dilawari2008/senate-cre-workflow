@@ -351,7 +351,7 @@ These provide differentiated input to the AI agents. In production, metrics come
 
 ## CRE Integration
 
-### Three Triggers — HTTP, EVM Log, Cron
+### Three Triggers — HTTP, EVM Log, Cron (only HTTP used in demo)
 
 The workflow registers all three triggers in a single entry point (`main.ts`):
 
@@ -375,7 +375,7 @@ return [
 ];
 ```
 
-### EVM Read — On-Chain Proposal Fetch
+### EVM Read — On-Chain Proposal Fetch (production only, not shown in demo)
 
 When a `ProposalCreated` log fires, `logCallback.ts` reads the full proposal from the governor contract:
 
@@ -480,35 +480,6 @@ const response = await fetch(
       fork_config: { network_id: 1, block_number: 'latest' },
       virtual_network_config: { chain_config: { chain_id: 1 } },
       explorer_page_config: { enabled: true, verification_visibility: 'src' },
-    }),
-  }
-);
-```
-
-### Transaction Simulation API
-
-`lib/tenderly.ts` runs full simulations via the Tenderly Simulation API:
-
-```typescript
-const response = await fetch(
-  `https://api.tenderly.co/api/v1/account/${config.tenderly.account}/project/${config.tenderly.project}/simulate`,
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Access-Key': config.tenderly.accessKey,
-    },
-    body: JSON.stringify({
-      network_id: '1',
-      from: params.from,
-      to: params.to,
-      input: params.calldata || '0x',
-      gas: 8_000_000,
-      gas_price: '0',
-      value: '0',
-      save: true,
-      save_if_fails: true,
-      simulation_type: 'full',
     }),
   }
 );
