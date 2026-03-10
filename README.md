@@ -349,6 +349,173 @@ These provide differentiated input to the AI agents. In production, metrics come
 
 ---
 
+## CRE Integration
+
+### Three Triggers — HTTP, EVM Log, Cron
+
+The workflow registers all three triggers in a single entry point (`main.ts`):
+
+```typescript
+const evmClient = new cre.capabilities.EVMClient(network.chainSelector.selector);
+
+const httpTrigger = new cre.capabilities.HTTPCapability().trigger({});
+
+const logTrigger = evmClient.logTrigger({
+  addresses: [config.senateGovernorAddress],
+  topics: [{ values: [eventHash] }],
+  confidence: "CONFIDENCE_LEVEL_FINALIZED",
+});
+
+const cronTrigger = new cre.capabilities.CronCapability().trigger({ schedule: "0 */6 * * *" });
+
+return [
+  cre.handler(httpTrigger, onHttpTrigger),
+  cre.handler(logTrigger, onLogTrigger),
+  cre.handler(cronTrigger, onCronTrigger),
+];
+```
+
+### EVM Read — On-Chain Proposal Fetch
+
+When a `ProposalCreated` log fires, `logCallback.ts` reads the full proposal from the governor contract:
+
+```typescript
+const evmClient = new cre.capabilities.EVMClient(network.chainSelector.selector);
+
+const readResult = evmClient
+  .callContract(runtime, {
+    call: encodeCallMsg({
+      from: zeroAddress,
+      to: runtime.config.senateGovernorAddress as Address,
+      data: callData,
+    }),
+    blockNumber: LAST_FINALIZED_BLOCK_NUMBER,
+  })
+  .result();
+```
+
+### DON-Signed Report + EVM Write
+
+After the debate, `pipeline.ts` generates a DON-signed report and publishes it on-chain:
+
+```typescript
+const reportPayload = encodeAbiParameters(
+  parseAbiParameters("bytes32, bytes32, uint8, uint8"),
+  [proposalHash, contentHash, verdict.recommendation, verdict.riskScore]
+);
+
+const report = runtime.report(prepareReportRequest(reportPayload as `0x${string}`)).result();
+
+const writeResult = evmClient
+  .writeReport(runtime, {
+    receiver: evmConfig.senateReportAddress,
+    report,
+    gasConfig: { gasLimit: evmConfig.gasLimit },
+  })
+  .result();
+```
+
+### Gemini AI via HTTPClient + Secret Retrieval
+
+`gemini.ts` calls the Gemini API through CRE's HTTPClient with DON consensus:
+
+```typescript
+const geminiApiKey = runtime.getSecret({ id: "GEMINI_API_KEY" }).result();
+const httpClient = new cre.capabilities.HTTPClient();
+
+const result = httpClient
+  .sendRequest(
+    runtime,
+    buildGeminiRequest(SYSTEM_PROMPT, userPrompt, geminiApiKey.value),
+    consensusIdenticalAggregation<GeminiCallResult>()
+  )(runtime.config)
+  .result();
+```
+
+---
+
+## Tenderly Integration
+
+### VTN Simulation via CRE HTTPClient
+
+`pipeline.ts` sends `eth_sendTransaction` to the Tenderly VTN RPC through CRE's HTTPClient:
+
+```typescript
+const rpcBody = JSON.stringify({
+  jsonrpc: "2.0",
+  method: "eth_sendTransaction",
+  params: [{ from: DEPLOYER, to: governorAddr, data: calldata, gas: "0x7A1200" }],
+  id: 1,
+});
+
+const bodyBytes = new TextEncoder().encode(rpcBody);
+const body = Buffer.from(bodyBytes).toString("base64");
+
+const resp = sendRequester
+  .sendRequest({
+    url: config.vtnRpcUrl,
+    method: "POST",
+    body,
+    headers: { "Content-Type": "application/json" },
+  })
+  .result();
+```
+
+### VTN Creation via REST API
+
+`lib/tenderly.ts` creates Virtual TestNets that fork mainnet:
+
+```typescript
+const response = await fetch(
+  `https://api.tenderly.co/api/v1/account/${config.tenderly.account}/project/${config.tenderly.project}/vnets`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Access-Key': config.tenderly.accessKey,
+    },
+    body: JSON.stringify({
+      slug: `senate-sim-${Date.now()}`,
+      display_name: `Senate: ${proposalTitle}`,
+      fork_config: { network_id: 1, block_number: 'latest' },
+      virtual_network_config: { chain_config: { chain_id: 1 } },
+      explorer_page_config: { enabled: true, verification_visibility: 'src' },
+    }),
+  }
+);
+```
+
+### Transaction Simulation API
+
+`lib/tenderly.ts` runs full simulations via the Tenderly Simulation API:
+
+```typescript
+const response = await fetch(
+  `https://api.tenderly.co/api/v1/account/${config.tenderly.account}/project/${config.tenderly.project}/simulate`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Access-Key': config.tenderly.accessKey,
+    },
+    body: JSON.stringify({
+      network_id: '1',
+      from: params.from,
+      to: params.to,
+      input: params.calldata || '0x',
+      gas: 8_000_000,
+      gas_price: '0',
+      value: '0',
+      save: true,
+      save_if_fails: true,
+      simulation_type: 'full',
+    }),
+  }
+);
+```
+
+---
+
 ## Roadmap
 
 - [ ] **Tenderly State Sync & Real Proposal Execution** — fork at exact proposal block, execute real calldata via impersonated Executor/Timelock, replace heuristic formulas with real state diffs
