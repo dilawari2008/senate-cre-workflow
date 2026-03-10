@@ -394,7 +394,7 @@ const readResult = evmClient
   .result();
 ```
 
-### DON-Signed Report + EVM Write
+### DON-Signed Report + EVM Write (shown in demo)
 
 After the debate, `pipeline.ts` generates a DON-signed report and publishes it on-chain:
 
@@ -415,7 +415,7 @@ const writeResult = evmClient
   .result();
 ```
 
-### Gemini AI via HTTPClient + Secret Retrieval
+### Gemini AI via HTTPClient + Secret Retrieval (shown in demo)
 
 `gemini.ts` calls the Gemini API through CRE's HTTPClient with DON consensus:
 
@@ -436,7 +436,7 @@ const result = httpClient
 
 ## Tenderly Integration
 
-### VTN Simulation via CRE HTTPClient
+### VTN Simulation via CRE HTTPClient (shown in demo)
 
 `pipeline.ts` sends `eth_sendTransaction` to the Tenderly VTN RPC through CRE's HTTPClient:
 
@@ -461,7 +461,7 @@ const resp = sendRequester
   .result();
 ```
 
-### VTN Creation via REST API
+### VTN Creation via REST API (shown in demo)
 
 `lib/tenderly.ts` creates Virtual TestNets that fork mainnet:
 
