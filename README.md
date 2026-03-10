@@ -8,34 +8,34 @@
 
 ### Demo Link
 
-- [Project Demo Video](https://drive.google.com/file/d/1Kh5wUfUBotGJiCLSjYxjQXSlOdlp-LkQ/view)
+- <a href="https://drive.google.com/file/d/1Kh5wUfUBotGJiCLSjYxjQXSlOdlp-LkQ/view" target="_blank">Project Demo Video</a>
 
 *Note: No dummy data was used. Actual transaction hashes and output from Gemini API calls are shown in the demo.*
 
 ### Tenderly Explorer Links
 
-- [Tenderly Virtual TestNet Explorer](https://dashboard.tenderly.co/explorer/vnet/e9d3fd02-270b-4e10-847f-db1f59922429)
+- <a href="https://dashboard.tenderly.co/explorer/vnet/e9d3fd02-270b-4e10-847f-db1f59922429" target="_blank">Tenderly Virtual TestNet Explorer</a>
 
 ### Chainlink Files
 
-- [`main.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/main.ts) — Workflow entry point. Uses `cre.capabilities.HTTPCapability` (HTTP Trigger), `evmClient.logTrigger` (EVM Log Trigger), `cre.capabilities.CronCapability` (Cron Trigger), `Runner.newRunner`, `getNetwork`
-- [`pipeline.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/pipeline.ts) — 7-step pipeline. Uses `cre.capabilities.HTTPClient` (4 HTTP calls), `cre.capabilities.EVMClient.writeReport` (on-chain write), `runtime.report` + `prepareReportRequest` (DON-signed report), `consensusIdenticalAggregation`
-- [`httpCallback.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/httpCallback.ts) — HTTP trigger handler. Uses `Runtime`, `HTTPPayload`, `decodeJson`
-- [`logCallback.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/logCallback.ts) — EVM log trigger handler. Uses `EVMClient.callContract` (EVM Read), `encodeCallMsg`, `LAST_FINALIZED_BLOCK_NUMBER`, `bytesToHex`, `EVMLog`
-- [`cronCallback.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/cronCallback.ts) — Cron trigger handler. Uses `EVMClient.callContract` (multiple EVM Reads), `CronPayload`, `HTTPClient` (webhook notification)
-- [`gemini.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/gemini.ts) — AI debate + attack scan. Uses `cre.capabilities.HTTPClient` (Gemini API calls), `runtime.getSecret` (secret retrieval), `consensusIdenticalAggregation`
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/main.ts" target="_blank"><code>main.ts</code></a> — Workflow entry point. Uses `cre.capabilities.HTTPCapability` (HTTP Trigger), `evmClient.logTrigger` (EVM Log Trigger), `cre.capabilities.CronCapability` (Cron Trigger), `Runner.newRunner`, `getNetwork`
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/pipeline.ts" target="_blank"><code>pipeline.ts</code></a> — 7-step pipeline. Uses `cre.capabilities.HTTPClient` (4 HTTP calls), `cre.capabilities.EVMClient.writeReport` (on-chain write), `runtime.report` + `prepareReportRequest` (DON-signed report), `consensusIdenticalAggregation`
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/httpCallback.ts" target="_blank"><code>httpCallback.ts</code></a> — HTTP trigger handler. Uses `Runtime`, `HTTPPayload`, `decodeJson`
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/logCallback.ts" target="_blank"><code>logCallback.ts</code></a> — EVM log trigger handler. Uses `EVMClient.callContract` (EVM Read), `encodeCallMsg`, `LAST_FINALIZED_BLOCK_NUMBER`, `bytesToHex`, `EVMLog`
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/cronCallback.ts" target="_blank"><code>cronCallback.ts</code></a> — Cron trigger handler. Uses `EVMClient.callContract` (multiple EVM Reads), `CronPayload`, `HTTPClient` (webhook notification)
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/gemini.ts" target="_blank"><code>gemini.ts</code></a> — AI debate + attack scan. Uses `cre.capabilities.HTTPClient` (Gemini API calls), `runtime.getSecret` (secret retrieval), `consensusIdenticalAggregation`
 
 
 
 ### Tenderly Files
 
-- [`pipeline.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/pipeline.ts) — Sends `eth_sendTransaction` to the Tenderly VTN RPC to simulate proposal creation, fetches receipt via `eth_getTransactionReceipt`, extracts `gasUsed` and `logCount` for heuristic risk metrics
-- [`lib/tenderly.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/lib/tenderly.ts) — Creates Tenderly Virtual TestNets via the REST API (`POST /vnets`), runs `POST /simulate` for full transaction simulations, computes TVL change and liquidation risk from state diffs
-- [`contracts/hardhat.config.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/hardhat.config.ts) — Configures `virtualMainnet` network pointing to the Tenderly VTN RPC, uses `@tenderly/hardhat-tenderly` plugin for private contract verification on the VTN explorer
-- [`contracts/scripts/deploy-all.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/scripts/deploy-all.ts) — Deploys SenateReport, SenateGovernor (x3), and SenateRiskOracle to the Tenderly VTN, seeds demo proposals and risk data on VTN
-- [`contracts/scripts/verify-vtn.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/scripts/verify-vtn.ts) — Verifies all deployed contracts on the Tenderly VTN explorer via `hre.tenderly.verify`
-- [`scripts/test-tenderly.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/scripts/test-tenderly.ts) — Tests Tenderly API connectivity, lists VTNs and simulations, runs a test simulation via `POST /simulate`
-- [`scripts/capture-tenderly-links.ts`](https://github.com/dilawari2008/senate-cre-workflow/blob/main/scripts/capture-tenderly-links.ts) — Fetches simulation URLs from MongoDB/API and generates markdown with Tenderly dashboard links
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/senate-workflow/my-senate-workflow/pipeline.ts" target="_blank"><code>pipeline.ts</code></a> — Sends `eth_sendTransaction` to the Tenderly VTN RPC to simulate proposal creation, fetches receipt via `eth_getTransactionReceipt`, extracts `gasUsed` and `logCount` for heuristic risk metrics
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/lib/tenderly.ts" target="_blank"><code>lib/tenderly.ts</code></a> — Creates Tenderly Virtual TestNets via the REST API (`POST /vnets`), runs `POST /simulate` for full transaction simulations, computes TVL change and liquidation risk from state diffs
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/hardhat.config.ts" target="_blank"><code>contracts/hardhat.config.ts</code></a> — Configures `virtualMainnet` network pointing to the Tenderly VTN RPC, uses `@tenderly/hardhat-tenderly` plugin for private contract verification on the VTN explorer
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/scripts/deploy-all.ts" target="_blank"><code>contracts/scripts/deploy-all.ts</code></a> — Deploys SenateReport, SenateGovernor (x3), and SenateRiskOracle to the Tenderly VTN, seeds demo proposals and risk data on VTN
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/contracts/scripts/verify-vtn.ts" target="_blank"><code>contracts/scripts/verify-vtn.ts</code></a> — Verifies all deployed contracts on the Tenderly VTN explorer via `hre.tenderly.verify`
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/scripts/test-tenderly.ts" target="_blank"><code>scripts/test-tenderly.ts</code></a> — Tests Tenderly API connectivity, lists VTNs and simulations, runs a test simulation via `POST /simulate`
+- <a href="https://github.com/dilawari2008/senate-cre-workflow/blob/main/scripts/capture-tenderly-links.ts" target="_blank"><code>scripts/capture-tenderly-links.ts</code></a> — Fetches simulation URLs from MongoDB/API and generates markdown with Tenderly dashboard links
 
 
 
@@ -43,11 +43,11 @@
 
 | Contract | Address |
 |----------|---------|
-| SenateReport | [0x04aD50e73Cdb46fDD0916c73F512E6e60A8f9a21](https://sepolia.etherscan.io/address/0x04aD50e73Cdb46fDD0916c73F512E6e60A8f9a21#code) |
-| SenateGovernor (Aave) | [0xC6833DE453D12Ae096aF77188970aE682D6a620e](https://sepolia.etherscan.io/address/0xC6833DE453D12Ae096aF77188970aE682D6a620e#code) |
-| SenateGovernor (Compound) | [0x746AD939133F3895B4990cE01CC442D0FC2b80c8](https://sepolia.etherscan.io/address/0x746AD939133F3895B4990cE01CC442D0FC2b80c8#code) |
-| SenateGovernor (Uniswap) | [0xC966383b6cf98f6995285Df798a451a8dC66AF81](https://sepolia.etherscan.io/address/0xC966383b6cf98f6995285Df798a451a8dC66AF81#code) |
-| SenateRiskOracle | [0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D](https://sepolia.etherscan.io/address/0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D#code) |
+| SenateReport | <a href="https://sepolia.etherscan.io/address/0x04aD50e73Cdb46fDD0916c73F512E6e60A8f9a21#code" target="_blank">0x04aD50e73Cdb46fDD0916c73F512E6e60A8f9a21</a> |
+| SenateGovernor (Aave) | <a href="https://sepolia.etherscan.io/address/0xC6833DE453D12Ae096aF77188970aE682D6a620e#code" target="_blank">0xC6833DE453D12Ae096aF77188970aE682D6a620e</a> |
+| SenateGovernor (Compound) | <a href="https://sepolia.etherscan.io/address/0x746AD939133F3895B4990cE01CC442D0FC2b80c8#code" target="_blank">0x746AD939133F3895B4990cE01CC442D0FC2b80c8</a> |
+| SenateGovernor (Uniswap) | <a href="https://sepolia.etherscan.io/address/0xC966383b6cf98f6995285Df798a451a8dC66AF81#code" target="_blank">0xC966383b6cf98f6995285Df798a451a8dC66AF81</a> |
+| SenateRiskOracle | <a href="https://sepolia.etherscan.io/address/0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D#code" target="_blank">0x9E0c245aF7206D92B59fA3d6c5d51F4Ef1a4740D</a> |
 
 -----------
 -----------
